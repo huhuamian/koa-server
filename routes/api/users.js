@@ -1,6 +1,8 @@
-const Router = require('koa-router');
+const Router = require('koa-router'); // 路由
 const router = new Router();
-const bcrypt = require('bcryptjs');
+const bcrypt = require('bcryptjs'); // 加密
+const gravatar = require('gravatar'); // 全球公认头像
+
 
 // 引入User模型
 const User = require('../../models/User')
@@ -32,10 +34,15 @@ router.post('/register', async ctx => {
         ctx.body = {'email': '邮箱已被占用！！！'};
     } else {
         // 没查到，说明数据不存在
+
+        // 设置头像
+        const avatar = gravatar.url(ctx.request.body.email, {s: '200', r: 'pg', d: 'mm'});
+
         const newUser = new User({
             name: ctx.request.body.name,
             email: ctx.request.body.email,
-            password: ctx.request.body.password
+            password: ctx.request.body.password,
+            avatar,
         })
 
         // console.log('newUser>>>>>>>>>', newUser);
@@ -45,7 +52,7 @@ router.post('/register', async ctx => {
         await bcrypt.genSalt(10, (err, salt) => {
             bcrypt.hash(newUser.password, salt, (err, hash) => {
                 // Store hash in your password DB.
-                console.log('hash>>>>>>>>>>>>', hash);
+                // console.log('hash>>>>>>>>>>>>', hash);
                 if (err) throw err;
                 newUser.password = hash;
 
