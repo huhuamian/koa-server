@@ -1,7 +1,8 @@
 const Router = require('koa-router'); // 路由
 const router = new Router();
-const bcrypt = require('bcryptjs'); // 加密
+// const bcrypt = require('bcryptjs'); // 加密
 const gravatar = require('gravatar'); // 全球公认头像
+const tools = require('../../config/tools');
 
 
 // 引入User模型
@@ -41,35 +42,49 @@ router.post('/register', async ctx => {
         const newUser = new User({
             name: ctx.request.body.name,
             email: ctx.request.body.email,
-            password: ctx.request.body.password,
+            password: tools.enbcrypt(ctx.request.body.password),
             avatar,
         })
 
         // console.log('newUser>>>>>>>>>', newUser);
 
         // 将密码加密
+        // await bcrypt.genSalt(10, (err, salt) => {
+        //     bcrypt.hash(newUser.password, salt, (err, hash) => {
+        //         // Store hash in your password DB.
+        //         // console.log('hash>>>>>>>>>>>>', hash);
+        //         if (err) throw err;
+        //         newUser.password = hash;
 
-        await bcrypt.genSalt(10, (err, salt) => {
-            bcrypt.hash(newUser.password, salt, (err, hash) => {
-                // Store hash in your password DB.
-                // console.log('hash>>>>>>>>>>>>', hash);
-                if (err) throw err;
-                newUser.password = hash;
+        //         // 存储到数据库
+        //         newUser
+        //         .save()
+        //         .then(user => {
+        //             ctx.body = user;
+        //         })
+        //         .catch(err => {
+        //             console.log('err:', err);
+        //         });
 
-                // 存储到数据库
-                newUser
-                .save()
-                .then(user => {
-                    ctx.body = user;
-                })
-                .catch(err => {
-                    console.log('err:', err);
-                });
+        //         // 返回json数据
+        //         ctx.body = newUser;
+        //     });
+        // });
 
-                // 返回json数据
-                ctx.body = newUser;
-    });
-        });
+        // 将密码加密
+        // const passwordHash = tools.enbcrype(newUser.password);
+        // newUser.password = passwordHash;
+
+        newUser
+        .save()
+        .then(user => {
+            ctx.body = user;
+        })
+        .catch(err => {
+            console.log(err);
+        })
+
+        ctx.body = newUser;
 
         console.log('newUser2222222222', newUser);
 
