@@ -5,10 +5,11 @@ const gravatar = require('gravatar'); // 全球公认头像
 const tools = require('../../config/tools');
 const jwt = require('jsonwebtoken'); // 引入生成token的插件
 const keys = require('../../config/keys');
+const passport = require('koa-passport');
 
 
 // 引入User模型
-const User = require('../../models/User')
+const User = require('../../models/User');
 
 /**
  * @route GET api/users/test
@@ -21,7 +22,7 @@ router.get('/test', async ctx => {
 })
 
 /**
- * @route api/users/register
+ * @route POST api/users/register
  * @desc 注册接口地址
  * @access 接口是公开的
  */
@@ -60,13 +61,13 @@ router.post('/register', async ctx => {
 
         ctx.body = newUser;
 
-        console.log('newUser2222222222', newUser);
+        // console.log('newUser>>>>>>>>>>>>>>>>>', newUser);
 
     }
 });
 
 /**
- * @route api/users/login
+ * @route POST api/users/login
  * @desc 登录接口 返回token（token中存有用户信息，并且用于其他接口的请求）
  * @access 接口是公开的
  * 
@@ -93,12 +94,10 @@ router.post('/login', async ctx => {
             // 生成token
             const token = jwt.sign(payload, keys.secretOrKey, {expiresIn: 3600});
 
-
             ctx.status = 200;
             ctx.body = {
                 success: '验证成功！',
                 token: `Bearer ${token}`
-                // token: 'Bearer ' + token
             };
 
         } else {
@@ -111,9 +110,21 @@ router.post('/login', async ctx => {
         ctx.status = 404;
         ctx.body = {email: '用户不存在！'};
     }
-
 });
 
+/**
+ * @route GET api/users/getUserInfo
+ * @desc 返回用户信息接口 返回用户信息
+ * @access 接口是私密的
+ */ 
+ router.get('/getUserInfo', passport.authenticate('jwt', { session: false }), async ctx => {
+    // ctx.body = ctx.state.user;
+    ctx.body = {
+        id: ctx.state.user.id,
+        name: ctx.state.user.name,
+        email: ctx.state.user.email,
+        avatar: ctx.state.user.avatar,
+    };
+ })
 
 module.exports = router.routes();
-

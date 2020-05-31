@@ -2,6 +2,7 @@ const Koa = require('koa');
 const Router = require('koa-router');
 const mongoose = require('mongoose');
 const bodyParser = require('koa-bodyparser');
+const passport = require('koa-passport');
 
 // 实例化对象
 const app = new Koa();
@@ -25,6 +26,12 @@ mongoose.connect(dbPath, { useUnifiedTopology: true })
     console.log('数据库连接失败！');
     console.log(err);
 });
+
+app.use(passport.initialize());
+app.use(passport.session());
+
+// 回调到config文件中 passport.js
+require('./config/passport')(passport);
 
 // 配置路由地址
 router.use('/api/users', users);
