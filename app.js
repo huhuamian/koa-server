@@ -1,13 +1,16 @@
 const Koa = require('koa');
 const Router = require('koa-router');
 const mongoose = require('mongoose');
+const bodyParser = require('koa-bodyparser');
 
 // 实例化对象
 const app = new Koa();
 const router = new Router();
 
+app.use(bodyParser());
+
 // 引入users.js
-const users = require('./routes/api/users.js')
+const users = require('./routes/api/users.js');
 
 // 路由跳转
 router.get('/', async ctx => (ctx.body = {mes: 'Hello Koa!!'}));
