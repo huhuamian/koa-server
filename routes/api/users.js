@@ -3,6 +3,8 @@ const router = new Router();
 const bcrypt = require('bcryptjs'); // 加密
 const gravatar = require('gravatar'); // 全球公认头像
 const tools = require('../../config/tools');
+const jwt = require('jsonwebtoken'); // 引入生成token的插件
+const keys = require('../../config/keys');
 
 
 // 引入User模型
@@ -72,24 +74,38 @@ router.post('/register', async ctx => {
 router.post('/login', async ctx => {
     // 查询当前登录的邮箱在数据库当中是否存在
     const findResult = await User.find({email: ctx.request.body.email});
+    const user = findResult[0];
 
     if (findResult.length > 0) {
         // 用户存在，验证其他信息
         // 查到用户信息后，验证密码
-        const checkPasswordResult = await bcrypt.compareSync(ctx.request.body.password, findResult[0].password);
+        const checkPasswordResult = await bcrypt.compareSync(ctx.request.body.password, user.password);
         if (checkPasswordResult) {
             // 密码验证成功
             // 返回token
+            const payload = {
+                // 对象内的信息是需要隐藏到token当中的
+                id: user.id,
+                name: user.name,
+                avatar: user.avatar,
+            }
+
+            // 生成token
+            const token = jwt.sign(payload, keys.secretOrKey, {expiresIn: 3600});
+
+
             ctx.status = 200;
-            ctx.body = {success: '验证成功！'};
+            ctx.body = {
+                success: '验证成功！',
+                token: `Bearer ${token}`
+                // token: 'Bearer ' + token
+            };
 
         } else {
             // 密码验证失败
             ctx.status = 400;
             ctx.body = {password: '密码错误！'};
         }
-
-
     } else {
         // 用户不存在
         ctx.status = 404;
