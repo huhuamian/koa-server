@@ -7,9 +7,11 @@ const jwt = require('jsonwebtoken'); // 引入生成token的插件
 const keys = require('../../config/keys');
 const passport = require('koa-passport');
 
-
 // 引入User模型
 const User = require('../../models/User');
+
+// 引入验证
+const validateRegisterInput = require('../../validation/register');
 
 /**
  * @route GET api/users/test
@@ -28,6 +30,14 @@ router.get('/test', async ctx => {
  */
 router.post('/register', async ctx => {
     // console.log(ctx.request.body);
+
+    const {errors, isValid} = validateRegisterInput(ctx.request.body);
+    // 判断当前是否通过
+    if(!isValid) {
+        ctx.status = 400;
+        ctx.body = errors;
+        return;
+    }
 
     // 存储到数据库
     const findResult = await User.find({email: ctx.request.body.email})
