@@ -10,8 +10,9 @@ const router = new Router();
 
 app.use(bodyParser());
 
-// 引入users.js
+// 引入users.js\profile.js
 const users = require('./routes/api/users.js');
+const profile = require('./routes/api/profile.js');
 
 // 路由跳转
 router.get('/', async ctx => (ctx.body = {mes: 'Hello Koa!!'}));
@@ -35,6 +36,7 @@ require('./config/passport')(passport);
 
 // 配置路由地址
 router.use('/api/users', users);
+router.use('/api/profile', profile);
 
 // 配置路由
 app.use(router.routes()).use(router.allowedMethods());

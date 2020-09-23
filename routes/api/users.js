@@ -11,7 +11,11 @@ const passport = require('koa-passport');
 const User = require('../../models/User');
 
 // 引入验证
+// 注册校验
 const validateRegisterInput = require('../../validation/register');
+// 登录校验
+const validateloginInput = require('../../validation/login');
+
 
 /**
  * @route GET api/users/test
@@ -34,6 +38,7 @@ router.post('/register', async ctx => {
     const {errors, isValid} = validateRegisterInput(ctx.request.body);
     // 判断当前是否通过
     if(!isValid) {
+        // 不是空的说明有报错信息
         ctx.status = 400;
         ctx.body = errors;
         return;
@@ -83,6 +88,15 @@ router.post('/register', async ctx => {
  * 
 */ 
 router.post('/login', async ctx => {
+    // console.log('ctx.request>>>>>>', ctx.request.body);
+    const {errors, isValid} = validateloginInput(ctx.request.body);
+
+    if (!isValid) {
+        ctx.status = 400;
+        ctx.body = errors;
+        return;
+    }
+
     // 查询当前登录的邮箱在数据库当中是否存在
     const findResult = await User.find({email: ctx.request.body.email});
     const user = findResult[0];
